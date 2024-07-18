@@ -1,0 +1,7 @@
+prettytable 
+tqdm 
+tenacity 
+wandb
+boto3
+langchain
+datasets

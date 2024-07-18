@@ -1,0 +1,17 @@
+<instruction> Generate an instruction for the following inputs (question and context) in order to get the following output. </instruction>
+
+<inputs>
+<question>
+{question}
+</question>
+
+<context>
+{context}
+</context>
+</inputs>
+
+<outputs> 
+{answer}
+</outputs>
+
+Generate the best instruction that can get the above output from the question and context in 1000 words or less. Make sure the instruction doesn't include anything from the question or context, it should only be a general instruction that can be used for many input & output pairs. 
