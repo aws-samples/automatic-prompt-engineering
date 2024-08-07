@@ -7,9 +7,9 @@ scoring model to determine the most effective prompts.The repository is based on
 First, you need to ask an Anthropic Claude model to generate an instruction for a set of inputs
 (question and context) as well as an output (answer). The LLM is then asked to generate a
 specific type of instruction, such as a one-paragraph instruction, one-sentence instruction, or
-step-by-step instruction. 10 such candidate instructions are generated from this LLM.
+step-by-step instruction. N such candidate instructions are generated from this LLM.
 
-Then, the resulting 10 instructions are tested against each other using an evaluation LLM (a
+Then, the resulting N instructions are tested against each other using an evaluation LLM (a
 Claude Instant model). To do this, first, each instruction is
 compared against all other instructions. Then, the evaluation LLM is used to evaluate the
 quality of prompts for a given task (query and context to answer pairs).
@@ -21,9 +21,9 @@ instruction.
 ## Steps to Run AutoPrompt
 1. Run ```pip install -r requirements.txt```
 
-2. Make sure to edit the configs file in src/utils.configs.py, primarily the absolute path variables. 
+2. Make sure to edit the configs file in src/utils.configs.py, primarily the absolute path variables. You can also change the NUMBER_OF_PROMPTS (the value for N candidate instructions generated), the model types to either Claude Instant, Claude v2, or Claude 3 Haiku (you can test and modify the code where fit to use other Bedrock hosted foundational models), and the prompts. The system_gen_prompt includes descriptions and test_cases that are available in the instruction_generation_templates/ folder. 
 
-3. Make sure you run your dataset with Ragas. Upload your dataset (update ragas_output.csv with your dataset) in the data folder. Instructions for how to run Ragas is in the 'Prompt_Engineer_Ragas.ipynb' notebook. 
+3. Make sure you run your dataset with Ragas. Upload your dataset and make sure it is in a similar format as shown in notebooks/Prompt_Engineer_Ragas.ipynb in the 'Import Sample Dataset' section. Instructions for how to run Ragas is in that same notebook. 
 
 4. Go through notebook 'notebooks/Prompt_Engineer_Ragas.ipynb'. Included in the notebook is a section on how to evaluate a dataset using Ragas. These outputs are inputted into the autoPrompt algorithm. The results from the notebook are uploaded in the data folder. 
 

@@ -1,11 +1,11 @@
 from tqdm import tqdm
 from tenacity import retry, stop_after_attempt, wait_exponential
-from langchain.llms.bedrock import Bedrock
+from langchain_aws import ChatBedrock
+from botocore.client import Config
 import re
 import json
 import boto3
 import pandas as pd
-
 import sys
 sys.path.append("/home/ec2-user/SageMaker/Auto-Prompt")
 
@@ -32,14 +32,17 @@ def get_llm(model_id, max_tokens=1000, temperature=0):
     Return:
         Bedrock: langchain bedrock instance
     """
-    llm = Bedrock(region_name=REGION,
-                  model_id=model_id, credentials_profile_name="default",
-
-                  model_kwargs={'max_tokens_to_sample': max_tokens,
+    config = {
+        "region_name": REGION,  # E.g. "us-east-1"
+        "model_id": model_id,  # E.g "anthropic.claude-v2"
+        "model_kwargs": {'max_tokens': max_tokens,
                                 'temperature': temperature,
-                                'stop_sequences': ['Question']})
-    llm.client = BEDROCK
-    return llm
+                                'stop_sequences': ['Question']},
+    }
+    bedrock_config = Config(connect_timeout=120, read_timeout=120, retries={'max_attempts': 2})
+    bedrock_client = boto3.client('bedrock-runtime')
+    bedrock_model = ChatBedrock(region_name=config['region_name'], model_id=config['model_id'], client=bedrock_client, model_kwargs=config['model_kwargs'])
+    return bedrock_model
 
 
 def llm_response_to_json(llm_output):
@@ -51,13 +54,14 @@ def llm_response_to_json(llm_output):
         dict: llm output in json
     """
     # Use regular expressions to find content between curly braces
-    matches = re.findall(r'\[(.*?)\]', llm_output, re.DOTALL)
-    if len(matches) < 1:
-        return "", []
-    try:
-        json_obj = json.loads("["+matches[0]+"]")
+    # matches = re.findall(r'\[(.*?)\]', llm_output, re.DOTALL)
+    # if len(matches) < 1:
+        # return "", []
+    # try:
+        # json_obj = json.loads("["+matches[0]+"]")
+    try: 
+        json_obj = json.loads(llm_output, strict=False)
     except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {str(e)}")
         return "", []
     return json_obj
 
@@ -86,7 +90,7 @@ def generate_candidate_prompts(description, test_cases, number_of_prompts,
                                                           number_of_prompts)
         output_str = ""
         while output_str == "":
-            response = llm(formated_prompt)
+            response = llm.invoke(formated_prompt).content
             outputs = llm_response_to_json(response)
             output_str = outputs[0]
         for output in outputs:
@@ -96,7 +100,7 @@ def generate_candidate_prompts(description, test_cases, number_of_prompts,
             formated_prompt = system_prompt.format(description=description,
                                                    test_case=
                                                    test_case['prompt'])
-            response = llm(formated_prompt)
+            response = llm.invoke(formated_prompt).content
             # response = statement_parser.parse(response).statements
             prompts.append(response)
     return prompts
@@ -144,7 +148,7 @@ def get_score(description, test_case, pos1, pos2, ranking_model_name,
     """
     formated_prompt = prompt.format(ranking_system_prompt=ranking_system_prompt,
                                     sub_prompt=sub_prompt, test_case=test_case)
-    score = llm(formated_prompt)
+    score = llm.invoke(formated_prompt).content
     return score.replace(' ', '')
 
 
@@ -174,7 +178,7 @@ def get_generation(prompt, test_case):
     """
     formated_prompt = combined_prompt.format(prompt=prompt,
                                              test_case=test_case)
-    response = llm(formated_prompt)
+    response = llm.invoke(formated_prompt).content
     return response
 
 

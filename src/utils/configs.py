@@ -10,15 +10,15 @@ path_to_prompt_ids = f"{path_to_data}prompt_ids.csv"
 # K is a constant factor that determines how much ratings change
 K = 32
 
-CANDIDATE_MODEL = 'anthropic.claude-instant-v1'
+CANDIDATE_MODEL = 'anthropic.claude-3-haiku-20240307-v1:0' #'anthropic.claude-instant-v1'
 CANDIDATE_MODEL_TEMPERATURE = 0.9
 
-GENERATION_MODEL = 'anthropic.claude-instant-v1'
+GENERATION_MODEL = 'anthropic.claude-3-haiku-20240307-v1:0' #'anthropic.claude-instant-v1'
 GENERATION_MODEL_TEMPERATURE = 0.1
 GENERATION_MODEL_MAX_TOKENS = 60
 
 N_RETRIES = 3  # number of times to retry a call to the ranking model if it fails
-RANKING_MODEL = 'anthropic.claude-instant-v1'
+RANKING_MODEL = 'anthropic.claude-3-haiku-20240307-v1:0' #'anthropic.claude-instant-v1'
 RANKING_MODEL_TEMPERATURE = 0.5
 
 
@@ -35,14 +35,14 @@ system_prompt = """
 {description}
 """
 
-system_gen_system_prompt = """Your job is to generate system prompts for Large
+system_gen_system_prompt = """
+                                Human: 
+                                Your job is to generate system prompts for Large
                                 Language Model, given a description of the
                                 use-case and some test cases.
 
-                                The prompts you will be generating will be for
-                                freeform tasks, such as generating a landing
-                                page headline, an intro paragraph, solving a
-                                math problem, etc.
+                                The prompts you will be generating are very general
+                                for the following test case. 
 
                                 In your generated prompt, you should describe
                                 how the AI should behave in plain English.
@@ -62,7 +62,11 @@ system_gen_system_prompt = """Your job is to generate system prompts for Large
 
                                 Most importantly, output `{number_of_prompts}`
                                 system prompts as a list of objects with
-                                `prompt` attribute in a json format."""
+                                `prompt` attribute in a json format and nothing else. 
+                                
+                                Agent: 
+                                Here is the json output of list of prompts:
+                                """
 
 
 ranking_system_prompt = """Your job is to rank the quality of two outputs

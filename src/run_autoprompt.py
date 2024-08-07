@@ -18,10 +18,6 @@ def autoprompt(fix_prompts, files):
     Returns: 
         None: upload new instructions and mapped instructions to ids. 
     """
-    fix_prompts['contexts'] = fix_prompts['contexts'].apply(literal_eval)
-    fix_prompts['ground_truths'] = fix_prompts['ground_truths'].apply(
-        literal_eval)
-
     new_prompts = fix_prompts.copy()
 
     # run autoprompt
@@ -32,7 +28,7 @@ def autoprompt(fix_prompts, files):
         sample = fix_prompts.iloc[i]
         question = sample['question']
         context = '. '.join(sample['contexts'])
-        answer = '. '.join(sample['ground_truths'])
+        answer = sample['ground_truth']
         description, test_cases = generate_ex_prompt_styles(files,
                                                             question=question,
                                                             context=context,
